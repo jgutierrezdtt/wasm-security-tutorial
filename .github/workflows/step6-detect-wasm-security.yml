@@ -6,6 +6,8 @@ on:
 jobs:
   detect:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     if: github.actor != 'github-actions[bot]'
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
@@ -20,11 +22,11 @@ jobs:
           script: |
             const fs = require('fs');
             const next = fs.readFileSync('.github/steps/step7.md', 'utf8');
-            const {{ owner, repo }} = context.repo;
-            await github.rest.repos.createOrUpdateFileContents({{
+            const { owner, repo } = context.repo;
+            await github.rest.repos.createOrUpdateFileContents({
               owner, repo,
               path: 'README.md',
               message: 'paso 7: desbloqueado',
               content: Buffer.from(next).toString('base64'),
-              sha: (await github.rest.repos.getContent({{ owner, repo, path: 'README.md' }})).data.sha
-            }});
+              sha: (await github.rest.repos.getContent({ owner, repo, path: 'README.md' })).data.sha
+            });
