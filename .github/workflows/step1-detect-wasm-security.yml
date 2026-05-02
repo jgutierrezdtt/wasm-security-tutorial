@@ -1,0 +1,30 @@
+name: "Paso 1: Compilar módulo WASM básico"
+on:
+  push:
+    paths:
+      - 'src/hello.wasm'
+jobs:
+  detect:
+    runs-on: ubuntu-latest
+    if: github.actor != 'github-actions[bot]'
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - name: Verificar paso actual
+        run: grep -q "Paso 1 de 10" README.md
+      - name: Verificar artefacto
+        run: test -f "src/hello.wasm"
+
+      - uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+            const next = fs.readFileSync('.github/steps/step2.md', 'utf8');
+            const {{ owner, repo }} = context.repo;
+            await github.rest.repos.createOrUpdateFileContents({{
+              owner, repo,
+              path: 'README.md',
+              message: 'paso 2: desbloqueado',
+              content: Buffer.from(next).toString('base64'),
+              sha: (await github.rest.repos.getContent({{ owner, repo, path: 'README.md' }})).data.sha
+            }});
